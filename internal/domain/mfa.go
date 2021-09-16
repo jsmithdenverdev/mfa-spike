@@ -1,3 +1,6 @@
 package domain
 
-type MfaCode struct{}
+type MfaCode struct {
+	Contact string
+	Code    string
+}
