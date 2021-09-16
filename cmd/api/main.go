@@ -42,7 +42,9 @@ func main() {
 			CreateCode: commands.CreateCode{
 				Writer: &mfaStore,
 			},
-			VerifyCode: commands.VerifyCode{},
+			VerifyCode: commands.VerifyCode{
+				Reader: &mfaStore,
+			},
 		},
 		Queries: api.Queries{
 			ReadUser: queries.ReadUser{
