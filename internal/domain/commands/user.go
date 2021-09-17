@@ -7,8 +7,8 @@ import (
 
 // create user -----------------------
 
-type CreateUser struct {
-	Writer userWriter
+type CreateUserHandler struct {
+	writer userWriter
 }
 
 type CreateUserRequest struct {
@@ -19,14 +19,20 @@ type CreateUserRequest struct {
 
 type CreateUserResponse struct{}
 
-func (c *CreateUser) Handle(request CreateUserRequest) (CreateUserResponse, error) {
+func NewCreateUserHandler(writer userWriter) CreateUserHandler {
+	return CreateUserHandler{
+		writer,
+	}
+}
+
+func (h *CreateUserHandler) Handle(request CreateUserRequest) (CreateUserResponse, error) {
 	tz, err := time.LoadLocation(request.Timezone)
 
 	if err != nil {
 		// log the error but continue
 	}
 
-	err = c.Writer.Write(&domain.User{
+	err = h.writer.Write(&domain.User{
 		Contact:  request.Contact,
 		Name:     request.Name,
 		Timezone: *tz,
@@ -41,18 +47,25 @@ func (c *CreateUser) Handle(request CreateUserRequest) (CreateUserResponse, erro
 
 // delete user -----------------------
 
+type DeleteUserHandler struct {
+	deleter userDeleter
+}
+
 type DeleteUserRequest struct {
 	Contact string
 }
 
-type DeleteUserResponse struct{}
-
-type DeleteUser struct {
-	Deleter userDeleter
+type DeleteUserResponse struct {
 }
 
-func (c *DeleteUser) Handle(request DeleteUserRequest) (DeleteUserResponse, error) {
-	err := c.Deleter.Delete(request.Contact)
+func NewDeleteUserHandler(deleter userDeleter) DeleteUserHandler {
+	return DeleteUserHandler{
+		deleter,
+	}
+}
+
+func (h *DeleteUserHandler) Handle(request DeleteUserRequest) (DeleteUserResponse, error) {
+	err := h.deleter.Delete(request.Contact)
 
 	if err != nil {
 		return DeleteUserResponse{}, err

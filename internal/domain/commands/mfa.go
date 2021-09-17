@@ -9,8 +9,8 @@ import (
 
 // create code -----------------------
 
-type CreateCode struct {
-	Writer mfaCodeWriter
+type CreateCodeHandler struct {
+	writer mfaCodeWriter
 }
 
 type CreateCodeRequest struct {
@@ -22,14 +22,20 @@ type CreateCodeResponse struct {
 	Code    string
 }
 
-func (cc CreateCode) Handle(request CreateCodeRequest) (CreateCodeResponse, error) {
+func NewCreateCodeHandler(writer mfaCodeWriter) CreateCodeHandler {
+	return CreateCodeHandler{
+		writer,
+	}
+}
+
+func (h CreateCodeHandler) Handle(request CreateCodeRequest) (CreateCodeResponse, error) {
 	var (
 		seed   = rand.New(rand.NewSource(time.Now().Unix()))
 		random = strconv.Itoa(seed.Int())
 		code   = random[0:6]
 	)
 
-	err := cc.Writer.Write(&domain.MfaCode{
+	err := h.writer.Write(&domain.MfaCode{
 		Contact: request.Contact,
 		Code:    code,
 	})
@@ -47,8 +53,8 @@ func (cc CreateCode) Handle(request CreateCodeRequest) (CreateCodeResponse, erro
 
 // verify code -----------------------
 
-type VerifyCode struct {
-	Reader mfaCodeReader
+type VerifyCodeHandler struct {
+	reader mfaCodeReader
 }
 
 type VerifyCodeRequest struct {
@@ -58,8 +64,14 @@ type VerifyCodeRequest struct {
 
 type VerifyCodeResponse struct{}
 
-func (vc VerifyCode) Handle(request VerifyCodeRequest) (VerifyCodeResponse, error) {
-	code, err := vc.Reader.Read(request.Contact)
+func NewVerifyCodeHandler(reader mfaCodeReader) VerifyCodeHandler {
+	return VerifyCodeHandler{
+		reader,
+	}
+}
+
+func (h VerifyCodeHandler) Handle(request VerifyCodeRequest) (VerifyCodeResponse, error) {
+	code, err := h.reader.Read(request.Contact)
 
 	// TODO: this error might be that there are no records
 	if err != nil {
@@ -75,12 +87,19 @@ func (vc VerifyCode) Handle(request VerifyCodeRequest) (VerifyCodeResponse, erro
 
 // expire code -----------------------
 
-type ExpireCode struct {
-	Deleter mfaCodeDeleter
+type ExpireCodeHandler struct {
+	deleter mfaCodeDeleter
 }
 
-type ExpireCodeRequest struct{}
+type ExpireCodeRequest struct {
+}
 
-func (ec ExpireCode) Handle(request ExpireCodeRequest) error {
+func NewExpireCodeHandler(deleter mfaCodeDeleter) ExpireCodeHandler {
+	return ExpireCodeHandler{
+		deleter,
+	}
+}
+
+func (h ExpireCodeHandler) Handle(request ExpireCodeRequest) error {
 	return nil
 }

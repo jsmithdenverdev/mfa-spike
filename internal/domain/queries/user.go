@@ -4,8 +4,8 @@ import "mfaspike/internal/domain"
 
 // read user -----------------------
 
-type ReadUser struct {
-	Reader userReader
+type ReadUserHandler struct {
+	reader userReader
 }
 
 type ReadUserRequest struct {
@@ -16,8 +16,14 @@ type ReadUserResponse struct {
 	User domain.User
 }
 
-func (q *ReadUser) Handle(request ReadUserRequest) (ReadUserResponse, error) {
-	user, err := q.Reader.Read(request.Contact)
+func NewReadUserHandler(reader userReader) ReadUserHandler {
+	return ReadUserHandler{
+		reader,
+	}
+}
+
+func (h *ReadUserHandler) Handle(request ReadUserRequest) (ReadUserResponse, error) {
+	user, err := h.reader.Read(request.Contact)
 
 	if err != nil {
 		return ReadUserResponse{}, err
