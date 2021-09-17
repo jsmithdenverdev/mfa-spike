@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (a *Api) Register(w http.ResponseWriter, r *http.Request) {
+func (a *Api) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	type registerRequest struct {
 		Phone    string `json:"phone"`
 		Name     string `json:"name"`
@@ -39,7 +39,7 @@ func (a *Api) Register(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (a *Api) Unregister(w http.ResponseWriter, r *http.Request) {
+func (a *Api) HandleUnregister(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	phone := vars["phone"]
 
@@ -60,7 +60,7 @@ func (a *Api) Unregister(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (a *Api) GetProfile(w http.ResponseWriter, r *http.Request) {
+func (a *Api) HandleReadProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	phone := vars["phone"]
 
@@ -87,4 +87,22 @@ func (a *Api) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (a *Api) HandleVersion(w http.ResponseWriter, r *http.Request) {
+	type versionResponse struct {
+		Version string `json:"version"`
+	}
+
+	res := versionResponse{Version: "0.0.1"}
+	enc := json.NewEncoder(w)
+	err := enc.Encode(&res)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	return
 }
