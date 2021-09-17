@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"mfaspike/internal/api"
 	"mfaspike/internal/domain/commands"
 	"mfaspike/internal/domain/queries"
@@ -23,38 +24,24 @@ func main() {
 		panic(err)
 	}
 
-	userStore := storage.UserStore{
-		Client: userDb,
-	}
-
-	mfaStore := storage.MfaStore{
-		Client: mfaDb,
-	}
+	userStore := storage.NewUserStore(userDb)
+	mfaStore := storage.NewMfaStore(mfaDb)
 
 	api := api.Api{
 		Commands: api.Commands{
-			CreateUser: commands.CreateUser{
-				Writer: &userStore,
-			},
-			DeleteUser: commands.DeleteUser{
-				Deleter: &userStore,
-			},
-			CreateCode: commands.CreateCode{
-				Writer: &mfaStore,
-			},
-			VerifyCode: commands.VerifyCode{
-				Reader: &mfaStore,
-			},
+			CreateUser: commands.NewCreateUserHandler(&userStore),
+			DeleteUser: commands.NewDeleteUserHandler(&userStore),
+			CreateCode: commands.NewCreateCodeHandler(&mfaStore),
+			VerifyCode: commands.NewVerifyCodeHandler(&mfaStore),
 		},
 		Queries: api.Queries{
-			ReadUser: queries.ReadUser{
-				Reader: &userStore,
-			},
+			ReadUser: queries.NewReadUserHandler(&userStore),
 		},
 	}
 
 	api.Router = mux.NewRouter()
-	api.Routes()
 
-	http.ListenAndServe("localhost:5000", api.Router)
+	api.ConfigureRoutes()
+
+	log.Fatal(http.ListenAndServe("localhost:5000", api.Router))
 }
