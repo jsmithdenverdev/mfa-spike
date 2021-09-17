@@ -75,7 +75,7 @@ func (h VerifyCodeHandler) Handle(request VerifyCodeRequest) (VerifyCodeResponse
 
 	// TODO: this error might be that there are no records
 	if err != nil {
-		return VerifyCodeResponse{}, nil
+		return VerifyCodeResponse{}, err
 	}
 
 	if code.Code != request.Code {
