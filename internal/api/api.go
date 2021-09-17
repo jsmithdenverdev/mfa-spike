@@ -14,12 +14,12 @@ type Api struct {
 }
 
 type Commands struct {
-	CreateCode commands.CreateCode
-	VerifyCode commands.VerifyCode
-	CreateUser commands.CreateUser
-	DeleteUser commands.DeleteUser
+	CreateCode commands.CreateCodeHandler
+	VerifyCode commands.VerifyCodeHandler
+	CreateUser commands.CreateUserHandler
+	DeleteUser commands.DeleteUserHandler
 }
 
 type Queries struct {
-	ReadUser queries.ReadUser
+	ReadUser queries.ReadUserHandler
 }
