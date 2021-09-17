@@ -24,8 +24,15 @@ func main() {
 		panic(err)
 	}
 
-	userStore := storage.NewUserStore(userDb)
-	mfaStore := storage.NewMfaStore(mfaDb)
+	userStore, err := storage.NewUserStore(userDb)
+	if err != nil {
+		panic(err)
+	}
+
+	mfaStore, err := storage.NewMfaStore(mfaDb)
+	if err != nil {
+		panic(err)
+	}
 
 	api := api.Api{
 		Commands: api.Commands{

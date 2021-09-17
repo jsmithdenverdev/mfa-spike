@@ -9,56 +9,62 @@ import (
 
 type mfaEntity struct {
 	gorm.Model
-	contact string `gorm:"primaryKey"`
-	code    string
+	Id   string `gorm:"primaryKey"`
+	Code string
 }
 
 type MfaStore struct {
 	client *gorm.DB
 }
 
-func NewMfaStore(client *gorm.DB) MfaStore {
-	return MfaStore{
+func NewMfaStore(client *gorm.DB) (MfaStore, error) {
+	store := MfaStore{
 		client,
 	}
+
+	if err := store.migrate(); err != nil {
+		return MfaStore{}, err
+	}
+
+	return store, nil
 }
 
-func (store *MfaStore) Migrate() error {
+func (store *MfaStore) migrate() error {
 	return store.client.AutoMigrate(&mfaEntity{})
 }
 
 func (store *MfaStore) Read(contact string) (domain.MfaCode, error) {
 	entity := mfaEntity{}
 
-	tx := store.client.First(&entity, contact)
+	err := store.client.First(&entity, contact).Error
 
-	if tx.Error != nil {
-		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.MfaCode{}, domain.ErrNoCode
 		}
 
-		return domain.MfaCode{}, tx.Error
+		return domain.MfaCode{}, err
 	}
 
 	return domain.MfaCode{
-		Contact: entity.contact,
-		Code:    entity.code,
+		Contact: entity.Id,
+		Code:    entity.Code,
 	}, nil
 }
 
 func (store *MfaStore) Write(code *domain.MfaCode) error {
-	tx := store.client.Create(&mfaEntity{
-		contact: code.Contact,
-		code:    code.Code,
-	})
+	err := store.client.Create(&mfaEntity{
+		Id:   code.Contact,
+		Code: code.Code,
+	}).Error
 
-	return tx.Error
+	return err
 }
 
 func (store *MfaStore) Delete(contact string) error {
-	tx := store.client.Delete(&mfaEntity{
-		contact: contact,
-	})
+	err := store.client.Delete(&mfaEntity{
+		Id: contact,
+	}).Error
 
-	return tx.Error
+	return err
 }

@@ -9,57 +9,63 @@ import (
 
 type userEntity struct {
 	gorm.Model
-	contact  string `gorm:"primaryKey"`
-	name     string
-	timezone string
+	Id       string `gorm:"primaryKey"`
+	Name     string
+	Timezone string
 }
 
 type UserStore struct {
 	client *gorm.DB
 }
 
-func NewUserStore(client *gorm.DB) UserStore {
-	return UserStore{
+func NewUserStore(client *gorm.DB) (UserStore, error) {
+	store := UserStore{
 		client,
 	}
+
+	if err := store.migrate(); err != nil {
+		return UserStore{}, err
+	}
+
+	return store, nil
 }
 
-func (store *UserStore) Migrate() error {
+func (store *UserStore) migrate() error {
 	return store.client.AutoMigrate(&userEntity{})
 }
 
 func (store *UserStore) Read(contact string) (domain.User, error) {
 	entity := userEntity{}
 
-	tx := store.client.First(&entity, contact)
+	err := store.client.First(&entity, contact).Error
 
-	if tx.Error != nil {
-		return domain.User{}, tx.Error
+	if err != nil {
+		return domain.User{}, err
 	}
 
-	tz, _ := time.LoadLocation(entity.timezone)
+	tz, _ := time.LoadLocation(entity.Timezone)
 
 	return domain.User{
-		Contact:  entity.contact,
-		Name:     entity.name,
+		Contact:  entity.Id,
+		Name:     entity.Name,
 		Timezone: *tz,
 	}, nil
 }
 
 func (store *UserStore) Write(user *domain.User) error {
-	tx := store.client.Create(&userEntity{
-		contact:  user.Contact,
-		name:     user.Name,
-		timezone: user.Timezone.String(),
-	})
+	err := store.client.Create(&userEntity{
+		Id:       user.Contact,
+		Name:     user.Name,
+		Timezone: user.Timezone.String(),
+	}).Error
 
-	return tx.Error
+	return err
 }
 
 func (store *UserStore) Delete(contact string) error {
-	tx := store.client.Delete(&userEntity{
-		contact: contact,
-	})
+	err := store.client.Delete(&userEntity{
+		Id: contact,
+	}).Error
 
-	return tx.Error
+	return err
 }
