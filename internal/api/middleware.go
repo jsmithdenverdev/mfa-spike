@@ -8,25 +8,25 @@ import (
 )
 
 var (
-	errNoPhone = errors.New("this endpoint requires an x-mfa-phone header")
-	errNoCode  = errors.New("no mfa code")
+	errNoPhone = errors.New("this endpoint requires an X-MFA-Phone header")
+	errNoCode  = errors.New("this endpoint requires an X-MFA-Code header")
 )
 
 func (a *Api) withMFA(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		mfaPhone := r.Header.Get("x-mfa-phone")
-		mfaCode := r.Header.Get("x-mfa-code")
+		mfaPhone := r.Header.Get("X-MFA-Phone")
+		mfaCode := r.Header.Get("X-MFA-Code")
 
 		// no mfa phone present on the request - invalid request
 		if mfaPhone == "" {
 			http.Error(w, errNoPhone.Error(), http.StatusUnauthorized)
+
 			return
 		}
 
 		// no mfa code present on the request
 		if mfaCode == "" {
 			http.Error(w, errNoCode.Error(), http.StatusUnauthorized)
-			w.WriteHeader(http.StatusUnauthorized)
 
 			// initiate the mfa flow
 			a.Commands.CreateCode.Handle(commands.CreateCodeRequest{
@@ -55,9 +55,11 @@ func (a *Api) withMFA(next http.Handler) http.Handler {
 
 			if errors.Is(err, domain.ErrCodeMismatch) {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
-
 				return
 			}
+
+			http.Error(w, ErrInternalServer.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		next.ServeHTTP(w, r)
