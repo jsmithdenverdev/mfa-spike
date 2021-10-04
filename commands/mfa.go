@@ -1,8 +1,9 @@
 package commands
 
 import (
+	"log"
 	"math/rand"
-	"mfaspike/internal/domain"
+	"mfaspike"
 	"strconv"
 	"time"
 )
@@ -35,7 +36,9 @@ func (h CreateCodeHandler) Handle(request CreateCodeRequest) (CreateCodeResponse
 		code   = random[0:6]
 	)
 
-	err := h.writer.Write(&domain.MfaCode{
+	log.Printf("mfa code: %s", code)
+
+	err := h.writer.Write(&mfaspike.Code{
 		Contact: request.Contact,
 		Code:    code,
 	})
@@ -79,7 +82,7 @@ func (h VerifyCodeHandler) Handle(request VerifyCodeRequest) (VerifyCodeResponse
 	}
 
 	if code.Code != request.Code {
-		return VerifyCodeResponse{}, domain.ErrCodeMismatch
+		return VerifyCodeResponse{}, mfaspike.ErrCodeMismatch
 	}
 
 	return VerifyCodeResponse{}, nil

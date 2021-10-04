@@ -1,6 +1,6 @@
 package queries
 
-import "mfaspike/internal/domain"
+import "mfaspike"
 
 // read user -----------------------
 
@@ -13,7 +13,7 @@ type ReadUserRequest struct {
 }
 
 type ReadUserResponse struct {
-	User domain.User
+	User mfaspike.User
 }
 
 func NewReadUserHandler(reader userReader) ReadUserHandler {

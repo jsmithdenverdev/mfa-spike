@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"mfaspike/internal/domain/commands"
-	"mfaspike/internal/domain/queries"
+	"mfaspike/commands"
+	"mfaspike/queries"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -56,8 +56,6 @@ func (a *Api) HandleUnregister(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (a *Api) HandleReadProfile(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +76,8 @@ func (a *Api) HandleReadProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Content-Type", "application/json")
+
 	enc := json.NewEncoder(w)
 	err = enc.Encode(result.User)
 
@@ -86,7 +86,6 @@ func (a *Api) HandleReadProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 }
 
 func (a *Api) HandleVersion(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +93,9 @@ func (a *Api) HandleVersion(w http.ResponseWriter, r *http.Request) {
 		Version string `json:"version"`
 	}
 
-	res := versionResponse{Version: "0.0.1"}
+	w.Header().Add("Content-Type", "application/json")
+
+	res := versionResponse{Version: "1.0.0"}
 	enc := json.NewEncoder(w)
 	err := enc.Encode(&res)
 
@@ -103,6 +104,4 @@ func (a *Api) HandleVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	return
 }

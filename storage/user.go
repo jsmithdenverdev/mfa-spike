@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"mfaspike/internal/domain"
+	"mfaspike"
 	"time"
 
 	"gorm.io/gorm"
@@ -34,25 +34,25 @@ func (store *UserStore) migrate() error {
 	return store.client.AutoMigrate(&userEntity{})
 }
 
-func (store *UserStore) Read(contact string) (domain.User, error) {
+func (store *UserStore) Read(contact string) (mfaspike.User, error) {
 	entity := userEntity{}
 
 	err := store.client.First(&entity, contact).Error
 
 	if err != nil {
-		return domain.User{}, err
+		return mfaspike.User{}, err
 	}
 
 	tz, _ := time.LoadLocation(entity.Timezone)
 
-	return domain.User{
+	return mfaspike.User{
 		Contact:  entity.Id,
 		Name:     entity.Name,
 		Timezone: *tz,
 	}, nil
 }
 
-func (store *UserStore) Write(user *domain.User) error {
+func (store *UserStore) Write(user *mfaspike.User) error {
 	err := store.client.Create(&userEntity{
 		Id:       user.Contact,
 		Name:     user.Name,

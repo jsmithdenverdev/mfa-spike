@@ -1,8 +1,8 @@
 package api
 
 import (
-	"mfaspike/internal/domain/commands"
-	"mfaspike/internal/domain/queries"
+	"mfaspike/commands"
+	"mfaspike/queries"
 
 	"github.com/gorilla/mux"
 )

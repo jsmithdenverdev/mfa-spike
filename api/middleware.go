@@ -2,8 +2,8 @@ package api
 
 import (
 	"errors"
-	"mfaspike/internal/domain"
-	"mfaspike/internal/domain/commands"
+	"mfaspike"
+	"mfaspike/commands"
 	"net/http"
 )
 
@@ -42,7 +42,7 @@ func (a *Api) withMFA(next http.Handler) http.Handler {
 		})
 
 		if err != nil {
-			if errors.Is(err, domain.ErrExpiredCode) {
+			if errors.Is(err, mfaspike.ErrExpiredCode) {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 
 				// re-initiate the mfa flow
@@ -53,7 +53,7 @@ func (a *Api) withMFA(next http.Handler) http.Handler {
 				return
 			}
 
-			if errors.Is(err, domain.ErrCodeMismatch) {
+			if errors.Is(err, mfaspike.ErrCodeMismatch) {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
 			}

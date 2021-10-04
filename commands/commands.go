@@ -1,13 +1,13 @@
 package commands
 
-import "mfaspike/internal/domain"
+import "mfaspike"
 
 type mfaCodeWriter interface {
-	Write(code *domain.MfaCode) error
+	Write(code *mfaspike.Code) error
 }
 
 type mfaCodeReader interface {
-	Read(contact string) (domain.MfaCode, error)
+	Read(contact string) (mfaspike.Code, error)
 }
 
 type mfaCodeDeleter interface {
@@ -15,7 +15,7 @@ type mfaCodeDeleter interface {
 }
 
 type userWriter interface {
-	Write(code *domain.User) error
+	Write(code *mfaspike.User) error
 }
 
 type userDeleter interface {

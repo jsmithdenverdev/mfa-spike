@@ -2,10 +2,11 @@ package main
 
 import (
 	"log"
-	"mfaspike/internal/api"
-	"mfaspike/internal/domain/commands"
-	"mfaspike/internal/domain/queries"
-	"mfaspike/internal/storage"
+	"mfaspike/api"
+	"mfaspike/cache"
+	"mfaspike/commands"
+	"mfaspike/queries"
+	"mfaspike/storage"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -19,27 +20,19 @@ func main() {
 		panic(err)
 	}
 
-	mfaDb, err := gorm.Open(sqlite.Open("mfa.db"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
 	userStore, err := storage.NewUserStore(userDb)
 	if err != nil {
 		panic(err)
 	}
 
-	mfaStore, err := storage.NewMfaStore(mfaDb)
-	if err != nil {
-		panic(err)
-	}
+	mfaCache := cache.NewCodeCache()
 
 	api := api.Api{
 		Commands: api.Commands{
 			CreateUser: commands.NewCreateUserHandler(&userStore),
 			DeleteUser: commands.NewDeleteUserHandler(&userStore),
-			CreateCode: commands.NewCreateCodeHandler(&mfaStore),
-			VerifyCode: commands.NewVerifyCodeHandler(&mfaStore),
+			CreateCode: commands.NewCreateCodeHandler(&mfaCache),
+			VerifyCode: commands.NewVerifyCodeHandler(&mfaCache),
 		},
 		Queries: api.Queries{
 			ReadUser: queries.NewReadUserHandler(&userStore),

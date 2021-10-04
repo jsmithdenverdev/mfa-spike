@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"mfaspike/internal/domain"
+	"mfaspike"
 	"time"
 )
 
@@ -32,7 +32,7 @@ func (h *CreateUserHandler) Handle(request CreateUserRequest) (CreateUserRespons
 		// log the error but continue
 	}
 
-	err = h.writer.Write(&domain.User{
+	err = h.writer.Write(&mfaspike.User{
 		Contact:  request.Contact,
 		Name:     request.Name,
 		Timezone: *tz,
